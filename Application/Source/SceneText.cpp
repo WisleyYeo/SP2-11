@@ -88,6 +88,21 @@ void SceneText::Init(GLFWwindow* m_window, float w, float h)
 	meshList[EXTSIDE] = MeshBuilder::GenerateQuad("Exterior Side", Color(1, 1, 1), 1.f, 1.f);
 	meshList[EXTSIDE]->textureID = LoadTGA("Image//ExtSide.tga");
 
+	meshList[GEO_FRONT] = MeshBuilder::GenerateQuad("front", Color(1, 1, 1), 1.f, 1.f);
+	meshList[GEO_FRONT]->textureID = LoadTGA("Image//skyfront.tga");
+	meshList[GEO_BACK] = MeshBuilder::GenerateQuad("back", Color(1, 1, 1), 1.f, 1.f);
+	meshList[GEO_BACK]->textureID = LoadTGA("Image//skyback.tga");
+	meshList[GEO_TOP] = MeshBuilder::GenerateQuad("top", Color(1, 1, 1), 1.f, 1.f);
+	meshList[GEO_TOP]->textureID = LoadTGA("Image//skytop.tga");
+	meshList[GEO_BOTTOM] = MeshBuilder::GenerateQuad("bottom", Color(1, 1, 1), 1.f, 1.f);
+	meshList[GEO_BOTTOM]->textureID = LoadTGA("Image//skybottom.tga");
+	meshList[GEO_LEFT] = MeshBuilder::GenerateQuad("left", Color(1, 1, 1), 1.f, 1.f);
+	meshList[GEO_LEFT]->textureID = LoadTGA("Image//skyright.tga");
+	meshList[GEO_RIGHT] = MeshBuilder::GenerateQuad("right", Color(1, 1, 1), 1.f, 1.f);
+	meshList[GEO_RIGHT]->textureID = LoadTGA("Image//skyleft.tga");
+	meshList[GEO_FLOOR] = MeshBuilder::GenerateQuad("floor", Color(1, 1, 1), 1.f, 1.f);
+	meshList[GEO_FLOOR]->textureID = LoadTGA("Image//grass.tga");
+
 	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
 	meshList[GEO_TEXT]->textureID = LoadTGA("Image//cambria.tga");
 
@@ -104,7 +119,7 @@ void SceneText::Init(GLFWwindow* m_window, float w, float h)
 	v.push_back(Vector3(420, 200, 300));
 	v.push_back(Vector3(400, 0, -300));
 
-	camera.Init(Vector3(0, 20, 50), Vector3(0, 0, 0), Vector3(0, 1, 0));
+	camera.Init(Vector3(0, 20, -50), Vector3(0, 0, 0), Vector3(0, 1, 0));
 	Mtx44 projection;
 	projection.SetToPerspective(45.f, 4.f/3.f, 0.1f, 10000.0f); //FOV, Aspect Ration, Near plane, Far plane
 	projectionStack.LoadMatrix(projection);
@@ -162,51 +177,56 @@ void SceneText::Render()
 
 	RenderMesh(meshList[GEO_AXES], false);
 
-	for (int count = 0; count < 2; count++)
-	for (int countx = -20; countx <= 20; countx++)
-	{
-		for (int countz = -15; countz <= 15; countz++)
-		{
-			modelStack.PushMatrix(); {
-				modelStack.Translate(countx * 20, 90 * count, countz * 20);
-				modelStack.Rotate(90 + count * 180, -1, 0, 0);
-				modelStack.Scale(20, 20, 20);
+	RenderInterior();
 
-				RenderMesh(meshList[TILE], false);
-			} modelStack.PopMatrix();
-		}
-	}
+	//Environment Front
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, -2000);
+	modelStack.Scale(4000, 4000, 4000);
+	RenderMesh(meshList[GEO_FRONT], false);
+	modelStack.PopMatrix();
 
-	for (int count = -1; count < 2; count += 2)
-	{
-		for (int hor = -20; hor <= 20; hor++)
-		{
-			for (int ver = 0; ver <= 10; ver ++)
-			{
-				modelStack.PushMatrix(); {
-					modelStack.Translate(hor * 20, ver * 20, 300 * count);
-					modelStack.Rotate(90 + 90 * count, 0, 1, 0);
-					modelStack.Scale(20, 20, 20);
-					RenderMesh(meshList[WALL], false);
-				} modelStack.PopMatrix();
-			}
-		}
-	}
-	for (int count = -1; count < 2; count += 2)
-	{
-		for (int hor = -15; hor <= 15; hor++)
-		{
-			for (int ver = 0; ver <= 10; ver ++)
-			{
-				modelStack.PushMatrix(); {
-					modelStack.Translate(-400 * count, ver * 20, hor * 20);
-					modelStack.Rotate(90 * count, 0, 1, 0);
-					modelStack.Scale(20, 20, 20);
-					RenderMesh(meshList[WALL], false);
-				} modelStack.PopMatrix();
-			}
-		}
-	}
+	//Environment Back
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 13.5, 2000);
+	modelStack.Rotate(180, 0, 1, 0);
+	modelStack.Scale(4000, 4000, 4000);
+	RenderMesh(meshList[GEO_BACK], false);
+	modelStack.PopMatrix();
+
+	//Environment Top
+	modelStack.PushMatrix();
+	modelStack.Rotate(90, 0, 1, 0);
+	modelStack.Translate(0, 2000.05, 0);
+	modelStack.Rotate(90, 1, 0, 0);
+	modelStack.Scale(4000, 4000, 4000);
+	RenderMesh(meshList[GEO_TOP], false);
+	modelStack.PopMatrix();
+
+	//Environment Bottom
+	modelStack.PushMatrix();
+	modelStack.Rotate(90, 0, -1, 0);
+	modelStack.Translate(0, -1980, 0);
+	modelStack.Rotate(90, -1, 0, 0);
+	modelStack.Scale(4000, 4000, 4000);
+	RenderMesh(meshList[GEO_BOTTOM], false);
+	modelStack.PopMatrix();
+
+	//Environment Left
+	modelStack.PushMatrix();
+	modelStack.Translate(-2000, 30, 0);
+	modelStack.Rotate(90, 0, 1, 0);
+	modelStack.Scale(4000, 4000, 4000);
+	RenderMesh(meshList[GEO_LEFT], false);
+	modelStack.PopMatrix();
+
+	//Environemtn Right
+	modelStack.PushMatrix();
+	modelStack.Translate(2000, 13, 0);
+	modelStack.Rotate(90, 0, -1, 0);
+	modelStack.Scale(4000, 4000, 4000);
+	RenderMesh(meshList[GEO_RIGHT], false);
+	modelStack.PopMatrix();
 
 	//Exterior Front
 	modelStack.PushMatrix();
@@ -238,6 +258,21 @@ void SceneText::Render()
 	modelStack.Scale(800, 200, 500);
 	RenderMesh(meshList[EXTSIDE], false);
 	modelStack.PopMatrix();
+
+	//Environment Floor
+	for(int i = 0; i <= 20; i++)
+	{
+		for(int a = 0; a < 20; a++)
+		{
+			modelStack.PushMatrix();
+			modelStack.Rotate(90, 0, -1, 0);
+			modelStack.Translate(i * 100 - 800, -20, a * 100 - 800);
+			modelStack.Rotate(90, -1, 0, 0);
+			modelStack.Scale(100, 100, 100);
+			RenderMesh(meshList[GEO_FLOOR], false);
+			modelStack.PopMatrix();
+		}
+	}
 
 	std::string str = to_string(fps);
 	RenderTextOnScreen(meshList[GEO_TEXT], "FPS:" + str, Color(0, 0, 0), 2, 30, 29.5);
@@ -303,6 +338,72 @@ void SceneText::RenderMesh(Mesh *mesh, bool enableLight)
 	if(mesh->textureID > 0)
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+}
+
+void SceneText::RenderInterior()
+{
+	for (int count = 0; count < 2; count++)
+	for (int countx = -20; countx < 20; countx++)
+	{
+		for (int countz = -15; countz < 15; countz++)
+		{
+			modelStack.PushMatrix(); {
+				modelStack.Translate(countx * 20 + 10, 90 * count, countz * 20 + 10);
+				modelStack.Rotate(90 + count * 180, -1, 0, 0);
+				modelStack.Scale(20, 20, 20);
+
+				if (!(countx > 13 && countz < -13 && count == 1))
+				RenderMesh(meshList[TILE], false);
+			} modelStack.PopMatrix();
+		}
+	}
+
+	for (int count = 0; count < 2; count++)
+	for (int countx = -20; countx < 20; countx++)
+	{
+		for (int countz = -15; countz < 15; countz++)
+		{
+			modelStack.PushMatrix(); {
+				modelStack.Translate(countx * 20 + 10, 90 * count+ 110, countz * 20 + 10);
+				modelStack.Rotate(90 + count * 180, -1, 0, 0);
+				modelStack.Scale(20, 20, 20);
+				
+				if (!(countx > 13 && countz < -13 && count == 0))
+				RenderMesh(meshList[TILE], false);
+			} modelStack.PopMatrix();
+		}
+	}
+
+	for (int count = -1; count < 2; count += 2)
+	{
+		for (int hor = -20; hor < 20; hor++)
+		{
+			for (int ver = 0; ver < 10; ver ++)
+			{
+				modelStack.PushMatrix(); {
+					modelStack.Translate(hor * 20 + 10, ver * 20 + 10, 300 * count);
+					modelStack.Rotate(90 + 90 * count, 0, 1, 0);
+					modelStack.Scale(20, 20, 20);
+					RenderMesh(meshList[WALL], false);
+				} modelStack.PopMatrix();
+			}
+		}
+	}
+	for (int count = -1; count < 2; count += 2)
+	{
+		for (int hor = -15; hor < 15; hor++)
+		{
+			for (int ver = 0; ver < 10; ver ++)
+			{
+				modelStack.PushMatrix(); {
+					modelStack.Translate(-400 * count, ver * 20 + 10, hor * 20 + 10);
+					modelStack.Rotate(90 * count, 0, 1, 0);
+					modelStack.Scale(20, 20, 20);
+					RenderMesh(meshList[WALL], false);
+				} modelStack.PopMatrix();
+			}
+		}
 	}
 }
 

@@ -23,6 +23,12 @@ class SceneText : public Scene
 		EXTSIDE,
 		EXTTOP,
 		GEO_TEXT,
+		GEO_TOP,
+		GEO_BOTTOM,
+		GEO_FRONT,
+		GEO_BACK,
+		GEO_LEFT,
+		GEO_RIGHT,
 		GEO_FLOOR,
 		NUM_GEOMETRY,
 	};
@@ -57,9 +63,9 @@ private:
 	unsigned m_programID;
 	unsigned m_parameters[U_TOTAL]; //Store handlers for uniform parameters
 	Light light[1];
-	void RenderSkyBox();
 	void RenderMesh(Mesh *mesh, bool enableLight);
-	void RenderModel();
+	void RenderSkyBox();
+	void RenderInterior();
 	void RenderText(Mesh* mesh, std::string text, Color color);
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
 public:
@@ -73,7 +79,7 @@ public:
 
 	MS modelStack, viewStack, projectionStack;
 
-	Camera2 camera;
+	CameraFly camera;
 
 	void load();
 	void reset();
